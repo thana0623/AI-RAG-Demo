@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: ai-rag-demo
+  datasource:
+    url: jdbc:h2:mem:ragdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+  redis:
+    host: localhost
+    port: 6379
+  mail:
+    host: smtp.qq.com       # Modify this based on your real SMTP server (e.g. smtp.gmail.com)
+    port: 465
+    username: your-email@qq.com
+    password: your-smtp-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:your-key-here}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+
+rag:
+  mq:
+    exchange: rag.exchange
+    queue: document.vectorize.queue
+    routing-key: document.vectorize.routing
