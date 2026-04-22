@@ -3,9 +3,9 @@ package com.demo.rag.service.impl;
 import com.demo.rag.service.RagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class RagServiceImpl implements RagService {
 
     private final VectorStore vectorStore;
-    private final ChatClient chatClient;
+    private final ChatModel chatModel;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
@@ -60,7 +60,7 @@ public class RagServiceImpl implements RagService {
         // 1. 从向量库查召回知识
         List<Document> documents = vectorStore.similaritySearch(question);
         String context = documents.stream()
-                .map(Document::getContent)
+            .map(Document::getText)
                 .collect(Collectors.joining("\n---\n"));
 
         // 2. 拼接提示词
@@ -71,7 +71,7 @@ public class RagServiceImpl implements RagService {
         ));
 
         // 3. 生成回答
-        String answer = chatClient.call(prompt).getResult().getOutput().getContent();
+        String answer = chatModel.call(prompt).getResult().getOutput().getText();
         
         // 存入 Redis 缓存10分钟
         redisTemplate.opsForValue().set(cacheKey, answer, 10, TimeUnit.MINUTES);

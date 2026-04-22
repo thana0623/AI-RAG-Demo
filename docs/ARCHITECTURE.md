@@ -21,5 +21,11 @@
 - 控制器层 (`controller/`) 应避免混入复杂业务逻辑，且保证其方法均通过 `Result<T>` 作为统一外层包裹输出给前端。
 - 前端应通过 Fetch 或 Axios 方法适配最新的响应 `code`, `data`, `message` 数据模型。
 
+## 配置管理规范（新增）
+- `backend/src/main/resources/application.yml` 为可提交的公共配置文件，统一使用环境变量占位符，避免硬编码敏感信息。
+- `backend/src/main/resources/application-local.yml` 为本地私有覆盖配置，不进入 Git（通过 `.gitignore` 管理）。
+- `backend/src/main/resources/application-local.yml.example` 为团队共享模板，用于快速初始化本地开发环境。
+- 中间件本地默认约定：RabbitMQ 使用 `5672`（AMQP）与 `15672`（控制台），Redis 使用 `6379`。
+
 ---
 `!Rule` 开发者提示：后续涉及到引入新的技术栈、改写包层结构分封，均要回查和修改本模块的架构说明。
