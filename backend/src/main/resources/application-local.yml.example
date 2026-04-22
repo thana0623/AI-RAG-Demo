@@ -3,7 +3,7 @@ spring:
   rabbitmq:
     host: 127.0.0.1
     port: 5672
-    # 本地默认可用 guest/guest（仅限本机开发），也可改为你自己的账号密码
+    # RabbitMQ 默认 guest/guest 仅允许 localhost 连接；如你已创建新账号请替换
     username: REPLACE_WITH_YOUR_RABBITMQ_USERNAME
     password: REPLACE_WITH_YOUR_RABBITMQ_PASSWORD
     virtual-host: /
@@ -14,6 +14,6 @@ spring:
       host: 127.0.0.1
       port: 6379
       # 如果你的本地 Redis 没有密码，可置空: ""
-      password: REPLACE_WITH_YOUR_REDIS_PASSWORD
+      password: REPLACE_OR_LEAVE_EMPTY_IF_NO_PASSWORD
       database: 0
       timeout: 3000ms
