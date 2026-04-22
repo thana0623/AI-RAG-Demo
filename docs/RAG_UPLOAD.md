@@ -23,5 +23,12 @@
   - 将分块后生成的多个 Document 片段交由嵌入模型（EmbeddingClient）转向量并持久化存储。
   - 最后，若向量化持久化成功，将 Redis 中对应文档标记改为 `SUCCESS`；否则抛出异常将标记置为 `FAILED`。
 
+## 本地环境配置说明（RabbitMQ / Redis）
+
+- 为了避免把本地账号密码提交到仓库，新增了示例文件：
+  - `backend/src/main/resources/application-local.yml.example`
+- 开发时请复制为 `application-local.yml` 并填入本地真实配置。
+- `application-local.yml` 已加入 `.gitignore`，仅在本地使用，不参与 Git 提交。
+
 ---
 `!Rule` 开发者提示：当修改文档上传、切块长度、队列参数或新增支持 PDF 导入等文档抽取功能时，请同步更新此文件。

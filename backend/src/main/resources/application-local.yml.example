@@ -1,0 +1,17 @@
+spring:
+  # === RabbitMQ 配置（本地示例，按需修改）===
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: your-rabbitmq-username
+    password: your-rabbitmq-password
+    virtual-host: /
+
+  # === Redis 配置（本地示例，按需修改）===
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: your-redis-password
+      database: 0
+      timeout: 3000ms
