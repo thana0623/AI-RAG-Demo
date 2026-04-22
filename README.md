@@ -6,12 +6,12 @@
 
 仓库内已提供脱敏模板：
 
-- `/home/runner/work/AI-RAG-Demo/AI-RAG-Demo/backend/src/main/resources/application-local.yml.example`
+- `backend/src/main/resources/application-local.yml.example`
 
 使用方式：
 
 1. 复制模板并创建你自己的本地配置文件：
-   - `cp /home/runner/work/AI-RAG-Demo/AI-RAG-Demo/backend/src/main/resources/application-local.yml.example /home/runner/work/AI-RAG-Demo/AI-RAG-Demo/backend/src/main/resources/application-local.yml`
+   - `cp backend/src/main/resources/application-local.yml.example backend/src/main/resources/application-local.yml`
 2. 将 `application-local.yml` 中的 RabbitMQ / Redis 连接信息改成你本机真实值。
 3. 运行后端时启用 `local` profile（例如：`--spring.profiles.active=local`）。
 
