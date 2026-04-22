@@ -12,7 +12,7 @@
 
 1. 复制模板并创建你自己的本地配置文件：
    - `cp backend/src/main/resources/application-local.yml.example backend/src/main/resources/application-local.yml`
-   - Windows PowerShell: `Copy-Item backend\\src\\main\\resources\\application-local.yml.example backend\\src\\main\\resources\\application-local.yml`
+   - Windows PowerShell: `Copy-Item backend\src\main\resources\application-local.yml.example backend\src\main\resources\application-local.yml`
 2. 将 `application-local.yml` 中的 RabbitMQ / Redis 连接信息改成你本机真实值。
 3. 运行后端时启用 `local` profile（例如：`--spring.profiles.active=local`）。
 
