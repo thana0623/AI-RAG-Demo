@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -57,14 +59,22 @@ public class AuthServiceImpl implements AuthService {
         // 保存到 Redis，有效期 10 分钟
         redisTemplate.opsForValue().set(CODE_PREFIX + type + ":" + email, code, 10, TimeUnit.MINUTES);
 
-        // 发送邮件
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(email);
-        message.setSubject("Your Verification Code");
-        message.setText("Your verification code for " + type + " is: " + code + "\nIt will expire in 10 minutes.");
-        
-        javaMailSender.send(message);
+        // 开发环境：打印验证码到日志
+        log.info("========================================");
+        log.info("验证码发送 - 邮箱: {}, 类型: {}, 验证码: {}", email, type, code);
+        log.info("========================================");
+
+        // 发送邮件（如果 SMTP 未配置会失败，但验证码已存入 Redis）
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(email);
+            message.setSubject("Your Verification Code");
+            message.setText("Your verification code for " + type + " is: " + code + "\nIt will expire in 10 minutes.");
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            log.warn("邮件发送失败（开发环境可忽略）: {}", e.getMessage());
+        }
     }
 
     @Override
