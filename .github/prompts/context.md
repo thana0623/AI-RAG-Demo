@@ -14,8 +14,11 @@
 - Maven
 
 ### 前端
-- Vue 3
-- Vite
+- Vue 3 + Vite
+- Arco Design（UI 组件库）
+- Pinia（状态管理）
+- Vue Router 4（路由管理）
+- Axios（统一 API 封装层）
 
 ### 中间件与存储
 - RabbitMQ（异步向量化任务队列）
@@ -40,6 +43,8 @@
    - 文档向量化状态（PENDING/PROCESSING/SUCCESS/FAILED）
 5. 配置管理采用三层文件：application.yml + application-local.yml + application-local.yml.example，避免敏感信息入库。
 6. 关系数据库已由 H2 切换为本地 MySQL，并提供初始化脚本 backend/sql/init_mysql.sql。
+7. 前端采用分层架构：api/（请求层）→ stores/（状态层）→ views/（视图层），API 调用统一从 api/ 层导入。
+8. 前端使用 Arco Design 组件库，Pinia 管理全局状态，Vue Router 4 管理路由及导航守卫。
 
 ### 认证模块决策（AUTH）
 1. 注册、登录、发送验证码、重置密码、获取当前用户信息完整闭环。
@@ -60,13 +65,13 @@
 ## 3. 待办事项（持续维护）
 
 - [ ] 明确并固化 RAG 检索 Top-K、分块策略参数（长度/重叠）并补充到 docs/RAG_UPLOAD.md 与 docs/RAG_ASK.md。
-- [ ] 统一前端 API 封装层，集中处理 Result<T> 响应与 Token 注入。
+- [x] 统一前端 API 封装层，集中处理 Result<T> 响应与 Token 注入。
 - [ ] 增加关键流程测试：
   - [ ] Auth 注册/登录/重置密码接口测试
   - [ ] RAG ask 缓存命中与未命中路径测试
   - [ ] 文档向量化状态流转集成测试
 - [x] 完成从 H2 到本地 MySQL 的迁移（配置、依赖、初始化 SQL）。
-- [ ] 规范化文档更新流程：PR 检查项中增加“是否同步更新 docs 与 context.md”。
+- [ ] 规范化文档更新流程：PR 检查项中增加"是否同步更新 docs 与 context.md"。
 
 ## 4. 每日操作记录索引（避免 context 过长）
 
@@ -80,19 +85,19 @@
 
 > 约定：
 > 1. 每天新建一个文件：`.github/prompts/daily/YYYY-MM-DD.md`
-> 2. 当天所有“需求/修改/对话结论”只写入当日日志
+> 2. 当天所有"需求/修改/对话结论"只写入当日日志
 > 3. context.md 仅保留索引与关键结论，保证读取效率
 > 4. recent-5.md 始终只保留最近 5 条（超出自动淘汰最旧项）
 > 5. 每累计 10 条时更新 summary-10.md 的 Stateful 摘要
 
 ## 6. 与 docs 目录的关系
 
-- docs/ 仍保留“按功能模块拆分”的详细说明：
+- docs/ 仍保留"按功能模块拆分"的详细说明：
   - docs/ARCHITECTURE.md
   - docs/AUTH.md
   - docs/RAG_ASK.md
   - docs/RAG_UPLOAD.md
-- 本文件承担“跨模块总览 + 决策时间线 + 操作记录”职责。
+- 本文件承担"跨模块总览 + 决策时间线 + 操作记录"职责。
 - 推荐实践：
   1. 先改代码
   2. 再改对应 docs 模块文档
