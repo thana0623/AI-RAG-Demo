@@ -7,3 +7,6 @@ frontend/dist/
 
 # Node modules
 frontend/node_modules/
+
+# Documentation
+docs/
