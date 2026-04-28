@@ -3,16 +3,6 @@
 > 规则：每次新增 1 条，超过 5 条时删除最旧 1 条，仅保留最近 5 条。
 > 单条定义：一次对话 + 对应操作（代码/配置/文档/命令）= 1 条。
 
-## Entry-001
-- 日期: 2026-04-23
-- 清洗后需求: 在 .github/prompts 下建立统一 context 文档，合并现有模块文档内容。
-- 代码变更:
-  - .github/prompts/context.md（新增）
-- 技术决策:
-  - 使用单一入口文档承载技术栈、决策、待办与记录索引。
-- 待办:
-  - 后续每次提交同步更新 context。
-
 ## Entry-002
 - 日期: 2026-04-23
 - 清洗后需求: 将后端数据库从 H2 迁移到本地 MySQL，并提供初始化 SQL。
@@ -70,4 +60,22 @@
   - Keep context as index and move details to daily/recent/summary files.
 - 待办:
   - When total reaches 10, review auto-generated summary quality.
+
+## Entry-006
+- 日期: 2026-04-28
+- 清洗后需求: 按新设计规范重构前端（TypeScript + 自研 UI + 分层结构），同步更新文档与上下文，并将 .idea 排除出版本控制，推进 PR 流程。
+- 代码变更:
+  - frontend/（结构重建、页面与组件重写、Vite/TS 配置）
+  - docs/ARCHITECTURE.md
+  - docs/AUTH.md
+  - docs/RAG_UPLOAD.md
+  - docs/RAG_ASK.md
+  - .github/prompts/context.md
+  - .github/prompts/daily/2026-04-28.md（新增）
+  - .gitignore
+- 技术决策:
+  - 前端采用 TypeScript + 自研 UI 组件体系，分层调整为 services/store/pages。
+  - .idea 不进入 Git，改走分支 PR 流程。
+- 待办:
+  - 补齐关键流程测试用例并纳入持续验证。
 

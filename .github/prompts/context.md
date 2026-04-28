@@ -76,6 +76,7 @@
 ## 4. 每日操作记录索引（避免 context 过长）
 
 - 2026-04-23: .github/prompts/daily/2026-04-23.md
+- 2026-04-28: .github/prompts/daily/2026-04-28.md
 
 ## 5. 递进式对话日志索引（新增）
 
