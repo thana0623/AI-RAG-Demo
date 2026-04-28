@@ -1,5 +1,9 @@
-# Backend local config
+# Backend local config (keep only locally)
 backend/src/main/resources/application-local.yml
+
+# Ensure IDE or OS temp files ignored
+*.swp
+*.tmp
 
 # Build output
 backend/target/
@@ -9,3 +13,4 @@ frontend/dist/
 frontend/node_modules/
 
 # Documentation
+.aider*
