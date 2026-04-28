@@ -13,5 +13,15 @@
     4. 添加用户的查询问题文本（UserMessage），统一向 ChatClient 调用大语言模型 API 获取回答文本。
     5. 接收回答文本返回前端，同时异步置入 Redis `qa_cache:<question>` 作为缓存，并设定有过期时间（10 分钟）。
 
+  ## 前端实现与页面
+  - 页面位置：`frontend/src/pages/home/index.vue`
+  - 问答面板组件：`frontend/src/pages/home/components/AskPanel.vue`
+  - API 调用封装：`frontend/src/services/rag.ts`
+
+  ## 前端交互流程（简要）
+  1. 用户输入问题并发送。
+  2. 请求中展示加载骨架，返回后显示回答文本。
+  3. 无结果时展示空状态提示。
+
 ---
 `!Rule` 开发者提示：当修改 Prompt 内容设定、相似度召回的 Top-N 控制、或者对话缓存处理逻辑时，请同步更新此文件中所述规则及业务逻辑。

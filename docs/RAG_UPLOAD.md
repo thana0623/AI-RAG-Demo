@@ -16,6 +16,17 @@
   - **接口:** `GET /api/rag/status/{docId}`
   - **流程:** 前端携带返回的 `docId` 轮询本接口。接口直接读取 Redis 中的状态标记（如 `PENDING`, `PROCESSING`, `SUCCESS`, `FAILED`），将实时状况返回前端。
 
+## 前端实现与页面
+- 页面位置：`frontend/src/pages/home/index.vue`
+- 上传面板组件：`frontend/src/pages/home/components/UploadPanel.vue`
+- 状态卡片组件：`frontend/src/components/business/DocumentStatusCard.vue`
+- API 调用封装：`frontend/src/services/rag.ts`
+
+## 前端交互流程（简要）
+1. 用户输入内容并提交。
+2. 成功后展示 `docId` 并默认状态为 `PENDING`。
+3. 用户可点击“刷新状态”轮询任务进度。
+
 - **异步消费者执行细节**
   - 使用 `@RabbitListener(queues = "${rag.mq.queue}")` 接收消息后触发真正的 AI 处理流。
   - 修改 Redis 中该文档对应的状态标志位（`PROCESSING`）。

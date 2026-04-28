@@ -1,50 +1,28 @@
 <template>
-  <a-config-provider>
-    <router-view />
-  </a-config-provider>
+  <RouterView v-slot="{ Component, route }">
+    <Transition name="fade" mode="out-in">
+      <component :is="layoutFor(route.meta.layout)">
+        <component :is="Component" />
+      </component>
+    </Transition>
+  </RouterView>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted } from 'vue'
-import { useAuthStore } from './stores/auth'
+import { RouterView } from 'vue-router'
+import MainLayout from '@/layouts/MainLayout.vue'
+import MobileLayout from '@/layouts/MobileLayout.vue'
+import { useUserStore } from '@/store/modules/user'
 
-const authStore = useAuthStore()
+const userStore = useUserStore()
+
+const layoutFor = (layout?: unknown) => {
+  if (layout === 'auth') return MobileLayout
+  return MainLayout
+}
 
 onMounted(() => {
-  authStore.init()
+  userStore.init().catch(() => undefined)
 })
 </script>
-
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-#app {
-  width: 100%;
-  min-height: 100vh;
-}
-
-/* 全局滚动条美化 */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-</style>

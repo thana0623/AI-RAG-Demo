@@ -24,6 +24,23 @@
   - **接口:** `GET /api/auth/current`
   - **流程:** 请求头携带 `Authorization: Bearer <Token>` 访问，返回除去密码字段以外的用户信息。
 
+## 前端实现与页面
+- 页面路由
+  - 登录页：`/login`
+  - 注册页：`/register`
+  - 找回密码：`/forgot-password`
+- 前端页面位置：
+  - 登录页组件：`frontend/src/pages/auth/login/index.vue`
+  - 注册页组件：`frontend/src/pages/auth/register/index.vue`
+  - 找回密码组件：`frontend/src/pages/auth/forgot-password/index.vue`
+- API 调用封装：`frontend/src/services/auth.ts`
+- 认证状态管理：`frontend/src/store/modules/user.ts`
+
+## 前端交互流程（简要）
+- 登录：提交 `identifier + password`，成功后保存 Token 并拉取用户信息。
+- 注册：先发送验证码，再提交 `email + username + password + code` 完成注册。
+- 找回密码：发送验证码后提交 `email + code + newPassword` 完成重置。
+
 ## 数据库设计
 使用 `sys_user` 表存储，包含 `id`, `email`, `username`, `password` 字段。密码利用 `SHA-256 + Salt` 进行不可逆散列加密。
 
