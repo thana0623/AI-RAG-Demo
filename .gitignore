@@ -5,6 +5,10 @@ backend/src/main/resources/application-local.yml
 *.swp
 *.tmp
 
+# IDE
+.idea/
+.idea/**
+
 # Build output
 backend/target/
 frontend/dist/
