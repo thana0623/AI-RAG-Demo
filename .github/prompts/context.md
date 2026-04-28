@@ -14,8 +14,8 @@
 - Maven
 
 ### 前端
-- Vue 3 + Vite
-- Arco Design（UI 组件库）
+- Vue 3 + Vite + TypeScript
+- 自研基础 UI 组件（BaseButton / BaseInput / BaseCard 等）
 - Pinia（状态管理）
 - Vue Router 4（路由管理）
 - Axios（统一 API 封装层）
@@ -43,8 +43,8 @@
    - 文档向量化状态（PENDING/PROCESSING/SUCCESS/FAILED）
 5. 配置管理采用三层文件：application.yml + application-local.yml + application-local.yml.example，避免敏感信息入库。
 6. 关系数据库已由 H2 切换为本地 MySQL，并提供初始化脚本 backend/sql/init_mysql.sql。
-7. 前端采用分层架构：api/（请求层）→ stores/（状态层）→ views/（视图层），API 调用统一从 api/ 层导入。
-8. 前端使用 Arco Design 组件库，Pinia 管理全局状态，Vue Router 4 管理路由及导航守卫。
+7. 前端采用分层架构：services/（请求层）→ store/（状态层）→ pages/（视图层），API 调用统一从 services/ 层导入。
+8. 前端去除 Arco Design，使用自研基础 UI 组件；Pinia 管理全局状态，Vue Router 4 管理路由及导航守卫。
 
 ### 认证模块决策（AUTH）
 1. 注册、登录、发送验证码、重置密码、获取当前用户信息完整闭环。
