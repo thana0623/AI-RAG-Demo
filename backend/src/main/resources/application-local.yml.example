@@ -1,32 +1,19 @@
 spring:
-  datasource:
-    url: jdbc:mysql://127.0.0.1:3306/rag_demo?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: your-mysql-username
-    password: your-mysql-password
-
+  # === RabbitMQ 配置（本地示例，按需修改）===
   rabbitmq:
     host: 127.0.0.1
     port: 5672
-    username: admin
-    password: 123456
+    # RabbitMQ 默认 guest/guest 仅允许 localhost 连接；如你已创建新账号请替换
+    username: REPLACE_WITH_YOUR_RABBITMQ_USERNAME
+    password: REPLACE_WITH_YOUR_RABBITMQ_PASSWORD
     virtual-host: /
 
+  # === Redis 配置（本地示例，按需修改）===
   data:
     redis:
       host: 127.0.0.1
       port: 6379
-      password: 123456
+      # 如果你的本地 Redis 没有密码，可置空: ""
+      password: REPLACE_OR_LEAVE_EMPTY_IF_NO_PASSWORD
       database: 0
       timeout: 3000ms
-
-  mail:
-    host: smtp.qq.com
-    port: 465
-    username: your-email@qq.com
-    password: your-smtp-password
-
-  ai:
-    openai:
-      api-key: your-openai-key
-      base-url: https://api.openai.com
