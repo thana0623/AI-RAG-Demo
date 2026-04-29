@@ -1,0 +1,24 @@
+﻿{
+    "nextEntryId": 6,
+    "windowId": "W-0001",
+    "windowStartEntry": 1,
+    "windowCount": 5,
+    "windowEntries": [
+        {
+            "id": 5,
+            "date": "2026-04-23",
+            "request": "Implement PowerShell automation to append one entry, keep only latest 5 in recent log, and update 10-entry stateful summary",
+            "changes": [
+                ".github/prompts/scripts/update-dialog-log.ps1",
+                ".github/prompts/workflow-log.md"
+            ],
+            "decisions": [
+                "Use script-driven progressive logging workflow",
+                "Keep context as index and move details to daily/recent/summary files"
+            ],
+            "todos": [
+                "When total reaches 10, review auto-generated summary quality"
+            ]
+        }
+    ]
+}
