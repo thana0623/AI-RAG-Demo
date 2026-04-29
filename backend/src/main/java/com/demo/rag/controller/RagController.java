@@ -1,5 +1,7 @@
 package com.demo.rag.controller;
 
+import com.demo.rag.common.BusinessException;
+import com.demo.rag.common.ErrorCode;
 import com.demo.rag.model.request.DocumentUploadRequest;
 import com.demo.rag.model.request.QuestionRequest;
 import com.demo.rag.model.response.AskResponse;
@@ -12,11 +14,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * RAG 控制器
+ * 处理文档上传、状态查询、知识问答等 RAG 相关请求
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/rag")
@@ -34,69 +41,71 @@ public class RagController {
     private String routingKey;
 
     /**
-     * 将长文档导入，通过 RabbitMQ 异步向量化。
-     * 用 Redis 返回任务状态。
+     * 上传文档，通过 RabbitMQ 异步向量化
+     * 返回 docId 用于查询处理状态
      */
     @PostMapping("/document")
     public Result<DocumentUploadResponse> uploadDocument(@RequestBody DocumentUploadRequest request) {
         String content = request.getContent();
-        if (content == null || content.trim().isEmpty()) {
-            return Result.error("The 'content' field is required");
+        if (!StringUtils.hasText(content)) {
+            throw new BusinessException(ErrorCode.CONTENT_REQUIRED);
         }
 
         String docId = UUID.randomUUID().toString();
-        
-        // 压入 MQ 队列，由 MqConsumer 异步完成向量化
+
+        // 发送到消息队列，由消费者异步完成向量化
         rabbitTemplate.convertAndSend(exchange, routingKey, Map.of(
                 "docId", docId,
                 "content", content
         ));
 
-        // 用 Redis 初始状态记为 PENDING
+        // Redis 初始状态标记为 PENDING
         redisTemplate.opsForValue().set("doc_status:" + docId, "PENDING");
 
-        log.info("Document upload task submitted for docId: {}", docId);
+        log.info("文档上传任务已提交，docId：{}", docId);
 
         DocumentUploadResponse response = DocumentUploadResponse.builder()
                 .docId(docId)
                 .statusUrl("/api/rag/status/" + docId)
                 .build();
-                
-        return Result.success("Document processing initialized asynchronously", response);
+
+        return Result.success("文档已提交，正在异步处理中", response);
     }
 
     /**
-     * 获取异步任务的状态 (查询 Redis)
+     * 查询文档向量化状态
      */
     @GetMapping("/status/{docId}")
     public Result<DocumentStatusResponse> getStatus(@PathVariable String docId) {
         String status = redisTemplate.opsForValue().get("doc_status:" + docId);
-        
+
         DocumentStatusResponse response = DocumentStatusResponse.builder()
                 .docId(docId)
                 .status(status != null ? status : "NOT_FOUND")
                 .build();
-                
+
         return Result.success(response);
     }
 
     /**
-     * 实时检索问答对话 (如果结果有 Redis 缓存，由 RagService 控制)
+     * 知识问答
+     * 先查 Redis 缓存，未命中则进行向量检索并调用大模型生成回答
      */
     @PostMapping("/ask")
     public Result<AskResponse> askQuestion(@RequestBody QuestionRequest request) {
         String question = request.getQuestion();
-        if (question == null || question.trim().isEmpty()) {
-            return Result.error("The 'question' field is required");
+        if (!StringUtils.hasText(question)) {
+            throw new BusinessException(ErrorCode.QUESTION_REQUIRED);
         }
 
+        log.info("收到问答请求：{}", question);
         String answer = ragService.askQuestion(question);
-        
+
         AskResponse response = AskResponse.builder()
                 .question(question)
                 .answer(answer)
                 .build();
-                
+
         return Result.success(response);
     }
 }

@@ -12,8 +12,19 @@
     3. 将检索到的上下文合并并在后方拼接进 Prompt 模板中作为 SystemMessage（指定助手为基于相关内容范围作答）。
     4. 添加用户的查询问题文本（UserMessage），统一向 ChatClient 调用大语言模型 API 获取回答文本。
     5. 接收回答文本返回前端，同时异步置入 Redis `qa_cache:<question>` 作为缓存，并设定有过期时间（10 分钟）。
+  - **异常:** 提问内容为空返回错误码 2002。
 
-  ## 前端实现与页面
+## 统一错误码
+| 错误码 | 说明 |
+|-------|------|
+| 2002 | 提问内容不能为空 |
+
+## 异常处理机制
+- Controller 层不再使用 try-catch 处理异常，统一由 `GlobalExceptionHandler` 捕获。
+- 参数校验失败时抛出 `BusinessException(ErrorCode.QUESTION_REQUIRED)`。
+- 所有日志和错误消息均为中文。
+
+## 前端实现与页面
   - 页面位置：`frontend/src/pages/home/index.vue`
   - 问答面板组件：`frontend/src/pages/home/components/AskPanel.vue`
   - API 调用封装：`frontend/src/services/rag.ts`

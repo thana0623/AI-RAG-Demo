@@ -13,12 +13,28 @@
 
 ## 后层代码 (Backend - Maven) 结构规范分层
 严格依照经典 **MVC** (Model-View-Controller) 架构分层组织：
-- `controller/`：控制器层。处理各模块的入参/出参接口。
-- `service/` 及 `service.impl/`：业务层。包括复杂的认证、发送邮件、RAG 交互、内容清洗加工。
+- `controller/`：控制器层。处理各模块的入参/出参接口。**不再包含 try-catch 异常处理，统一交由 GlobalExceptionHandler 处理。**
+- `service/` 及 `service.impl/`：业务层。包括复杂的认证、发送邮件、RAG 交互、内容清洗加工。**业务异常通过 BusinessException 抛出。**
+- `common/`：公共模块。包含统一错误码枚举（`ErrorCode`）、自定义业务异常（`BusinessException`）、全局异常处理器（`GlobalExceptionHandler`）。
 - `model/` 及其下的 `request`/`response`/`entity` 包：实体定义包。规定外部请求 (`Request`) 结构，和数据内部响应及数据库关联实体对象 (`Entity`) 以及通过统一包装泛型类返回 (`Result.java`) 的设计。
 - `repository/`：持久层。存放继承自 `JpaRepository` 的各类数据交互接口。
 - `mq/`：专门的消息消费者服务。处理从 Rabbit 收到数据后的分发落库及业务传递逻辑。
 - `config/`：配置及注册中心。存放涉及向量库、交换机、队列注入等第三方 SDK 和配置的 Bean 的地方。
+
+### 新增 common 包说明
+```
+common/
+├── ErrorCode.java            # 统一错误码枚举（中文错误消息）
+├── BusinessException.java    # 自定义业务异常
+└── GlobalExceptionHandler.java # 全局统一异常处理器
+```
+
+**异常处理流程：**
+```
+Controller（无 try-catch）→ Service（抛出 BusinessException）
+  → GlobalExceptionHandler（统一捕获）
+  → Result<T>（返回中文错误信息）
+```
 
 ## 前端代码 (Frontend - Vue 3) 分层架构
 
@@ -58,6 +74,9 @@ frontend/src/
 
 ## 规范与最佳实践
 - 控制器层 (`controller/`) 应避免混入复杂业务逻辑，且保证其方法均通过 `Result<T>` 作为统一外层包裹输出给前端。
+- **控制器层禁止使用 try-catch 处理异常，统一由 GlobalExceptionHandler 处理。**
+- **业务异常使用 BusinessException 抛出，配合 ErrorCode 枚举使用中文错误消息。**
+- **所有日志输出使用中文，便于开发调试。**
 - 前端应通过统一的 API 层（`services/request.ts`）适配后端的 `code`, `data`, `message` 响应模型。
 - 前端所有 API 调用先统一引入 `services/` 层，再在组件中使用，避免直接在组件中编写请求逻辑。
 
