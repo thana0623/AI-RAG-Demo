@@ -16,3 +16,6 @@ frontend/dist/
 # Node modules
 frontend/node_modules/
 frontend/package-lock.json
+
+# Local AI assistant artifacts
+.aider*
