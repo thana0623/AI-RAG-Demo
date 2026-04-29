@@ -11,10 +11,22 @@
     2. 生成唯一的 `docId` (UUID) 并在 Redis 中创建此任务记录，状态初始置为 `PENDING`。
     3. 向 RabbitMQ 的 `document.vectorize.queue` 队列发送消息（包含 `docId` 及其 `content` 内容）。
     4. HTTP 会话立刻返回包含 `docId` 的响应给调用方。
+  - **异常:** 文档内容为空返回错误码 2001。
 
 - **获取异步处理状态**
   - **接口:** `GET /api/rag/status/{docId}`
   - **流程:** 前端携带返回的 `docId` 轮询本接口。接口直接读取 Redis 中的状态标记（如 `PENDING`, `PROCESSING`, `SUCCESS`, `FAILED`），将实时状况返回前端。
+
+## 统一错误码
+| 错误码 | 说明 |
+|-------|------|
+| 2001 | 文档内容不能为空 |
+| 2004 | 文档向量化处理失败 |
+
+## 异常处理机制
+- Controller 层不再使用 try-catch 处理异常，统一由 `GlobalExceptionHandler` 捕获。
+- 参数校验失败时抛出 `BusinessException(ErrorCode.CONTENT_REQUIRED)`。
+- 所有日志和错误消息均为中文。
 
 ## 前端实现与页面
 - 页面位置：`frontend/src/pages/home/index.vue`
@@ -25,7 +37,7 @@
 ## 前端交互流程（简要）
 1. 用户输入内容并提交。
 2. 成功后展示 `docId` 并默认状态为 `PENDING`。
-3. 用户可点击“刷新状态”轮询任务进度。
+3. 用户可点击"刷新状态"轮询任务进度。
 
 - **异步消费者执行细节**
   - 使用 `@RabbitListener(queues = "${rag.mq.queue}")` 接收消息后触发真正的 AI 处理流。

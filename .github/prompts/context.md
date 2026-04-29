@@ -45,6 +45,17 @@
 6. 关系数据库已由 H2 切换为本地 MySQL，并提供初始化脚本 backend/sql/init_mysql.sql。
 7. 前端采用分层架构：services/（请求层）→ store/（状态层）→ pages/（视图层），API 调用统一从 services/ 层导入。
 8. 前端去除 Arco Design，使用自研基础 UI 组件；Pinia 管理全局状态，Vue Router 4 管理路由及导航守卫。
+9. 新增 common 包（ErrorCode / BusinessException / GlobalExceptionHandler），实现全局统一异常处理，Controller 层不再使用 try-catch。
+10. 所有日志和错误消息统一使用中文，便于开发调试。
+11. Result 类增加 error(int code, String message) 和 error(ErrorCode) 方法，支持带错误码的失败返回。
+
+### Prompt 工程决策
+1. 每次接到新请求，先读 `.github/prompts/context.md`，再按任务类型读取对应 prompts 文件。
+2. 需求不清晰时必须先追问，直到目标、输入输出、约束、验收标准明确后，才能进入设计与编码。
+3. 后端任务优先遵循 `.github/prompts/backend/backend.md`，前端任务优先遵循 `.github/prompts/front/front.md` 和必要的结构补充 prompt。
+4. 追问统一使用固定问题清单，避免临场发挥造成口径漂移。
+5. 第 1 阶段（已实施）：强化 copilot-instructions.md 的启动检查、任务自动路由、执行确认机制。
+6. 每个请求输出时必须展示"✓ Step X 已完成"的确认标记，保证可追踪性。
 
 ### 认证模块决策（AUTH）
 1. 注册、登录、发送验证码、重置密码、获取当前用户信息完整闭环。
@@ -72,11 +83,12 @@
   - [ ] 文档向量化状态流转集成测试
 - [x] 完成从 H2 到本地 MySQL 的迁移（配置、依赖、初始化 SQL）。
 - [ ] 规范化文档更新流程：PR 检查项中增加"是否同步更新 docs 与 context.md"。
+- [x] 固化 prompt 执行顺序：先读 context，再按任务类型读取 prompts，需求不清晰先追问后设计。
 
 ## 4. 每日操作记录索引（避免 context 过长）
-
 - 2026-04-23: .github/prompts/daily/2026-04-23.md
 - 2026-04-28: .github/prompts/daily/2026-04-28.md
+- 2026-04-29: .github/prompts/daily/2026-04-29.md
 
 ## 5. 递进式对话日志索引（新增）
 

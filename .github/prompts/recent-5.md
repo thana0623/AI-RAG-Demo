@@ -3,21 +3,6 @@
 > 规则：每次新增 1 条，超过 5 条时删除最旧 1 条，仅保留最近 5 条。
 > 单条定义：一次对话 + 对应操作（代码/配置/文档/命令）= 1 条。
 
-## Entry-002
-- 日期: 2026-04-23
-- 清洗后需求: 将后端数据库从 H2 迁移到本地 MySQL，并提供初始化 SQL。
-- 代码变更:
-  - backend/pom.xml
-  - backend/src/main/resources/application.yml
-  - backend/src/main/resources/application-local.yml.example
-  - backend/sql/init_mysql.sql（新增）
-  - docs/ARCHITECTURE.md
-  - .github/prompts/context.md
-- 技术决策:
-  - 运行时数据库统一为 MySQL 8.x，保留初始化脚本用于快速落库。
-- 待办:
-  - 启动流程中固定执行一次数据库初始化校验。
-
 ## Entry-003
 - 日期: 2026-04-23
 - 清洗后需求: 隐去本地数据库敏感信息，补充 AUTH 的 MySQL 规范，并按天拆分记录。
@@ -79,3 +64,48 @@
 - 待办:
   - 补齐关键流程测试用例并纳入持续验证。
 
+## Entry-007
+- 日期: 2026-04-29
+- 清洗后需求: 优化 prompts 工程，强制先读 context，再按任务类型读取对应 prompts；需求不清晰时反复追问，明确后再设计和编码。
+- 代码变更:
+  - .github/copilot-instructions.md
+  - .github/prompts/workflow-log.md
+  - .github/prompts/backend/backend.md
+  - .github/prompts/front/front.md
+  - .github/prompts/front/p1.md
+  - .github/prompts/context.md
+  - .github/prompts/summary-10.md
+- 技术决策:
+  - 将 prompt 执行顺序固化到项目级指令与场景化 prompt 中。
+  - 需求澄清前禁止猜测、禁止设计、禁止写代码。
+- 待办:
+  - 继续观察后续对话，确认澄清规则是否足够稳定。
+
+## Entry-008
+- 日期: 2026-04-29
+- 清洗后需求: 为 prompts 工程补充固定追问清单，让需求不清晰时先按统一问题集追问，再进入设计和编码。
+- 代码变更:
+  - .github/copilot-instructions.md
+  - .github/prompts/workflow-log.md
+  - .github/prompts/backend/backend.md
+  - .github/prompts/front/front.md
+  - .github/prompts/front/p1.md
+  - .github/prompts/context.md
+  - .github/prompts/summary-10.md
+- 技术决策:
+  - 将澄清问题标准化为固定清单，降低不同任务之间的追问偏差。
+  - 继续保持“先问清楚，再设计，再编码”的执行顺序。
+- 待办:
+  - 观察后续任务中该固定清单是否还能进一步收敛为更短的最小问题集。
+## Entry-009
+- 日期: 2026-04-29
+- 清洗后需求: 实施 prompt 工程第 1 阶段——强化 copilot-instructions.md，加入启动检查、自动路由、执行确认机制。
+- 代码变更:
+  - .github/copilot-instructions.md（重构执行流程，从建议性改为强制性）
+  - .github/prompts/context.md（补充第 1 阶段决策）
+  - .github/prompts/summary-10.md
+- 技术决策:
+  - 智能体每次回答前必须输出启动检查清单、任务类型识别、需求澄清确认、设计评审确认。
+  - 引入"✓ Step X 已完成"的执行标记，实现完全可追踪的流程。
+- 待办:
+  - 观察新执行流程在后续对话中是否生效，需要多轮验证。
