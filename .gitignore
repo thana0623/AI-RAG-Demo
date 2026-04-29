@@ -1,4 +1,18 @@
-frontend/node_modules/
-frontend/dist/
-frontend/package-lock.json
+# Backend local config (keep only locally)
 backend/src/main/resources/application-local.yml
+
+# Ensure IDE or OS temp files ignored
+*.swp
+*.tmp
+
+# IDE
+.idea/
+.idea/**
+
+# Build output
+backend/target/
+frontend/dist/
+
+# Node modules
+frontend/node_modules/
+frontend/package-lock.json
