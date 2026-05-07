@@ -2,6 +2,7 @@ package com.demo.rag.service.impl;
 
 import com.demo.rag.common.BusinessException;
 import com.demo.rag.common.ErrorCode;
+import com.demo.rag.repository.DocumentRepository;
 import com.demo.rag.service.RagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ public class RagServiceImpl implements RagService {
     private final VectorStore vectorStore;
     private final ChatModel chatModel;
     private final RedisTemplate<String, String> redisTemplate;
+    private final DocumentRepository documentRepository;
 
     /** 问答缓存过期时间（分钟） */
     private static final long QA_CACHE_TTL_MINUTES = 10;
@@ -41,6 +43,7 @@ public class RagServiceImpl implements RagService {
         try {
             log.info("开始处理文档向量化，docId：{}", docId);
             redisTemplate.opsForValue().set("doc_status:" + docId, "PROCESSING");
+            updateDocumentStatus(docId, "PROCESSING", null);
 
             // 创建文档并切块
             Document document = new Document(content, Map.of("docId", docId));
@@ -51,11 +54,26 @@ public class RagServiceImpl implements RagService {
             vectorStore.add(splitDocs);
 
             redisTemplate.opsForValue().set("doc_status:" + docId, "SUCCESS");
+            updateDocumentStatus(docId, "SUCCESS", splitDocs.size());
             log.info("文档向量化完成，docId：{}，切块数量：{}", docId, splitDocs.size());
         } catch (Exception e) {
             redisTemplate.opsForValue().set("doc_status:" + docId, "FAILED");
+            updateDocumentStatus(docId, "FAILED", null);
             log.error("文档向量化失败，docId：{}，错误：{}", docId, e.getMessage(), e);
         }
+    }
+
+    /**
+     * 更新文档实体的状态和切块数量
+     */
+    private void updateDocumentStatus(String docId, String status, Integer chunkCount) {
+        documentRepository.findByDocId(docId).ifPresent(doc -> {
+            doc.setStatus(status);
+            if (chunkCount != null) {
+                doc.setChunkCount(chunkCount);
+            }
+            documentRepository.save(doc);
+        });
     }
 
     @Override

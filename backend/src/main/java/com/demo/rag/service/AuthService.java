@@ -12,4 +12,5 @@ public interface AuthService {
     String login(LoginRequest request);
     void resetPassword(ResetPasswordRequest request);
     User getUserInfo(String token);
+    User getUserInfoById(Long userId);
 }

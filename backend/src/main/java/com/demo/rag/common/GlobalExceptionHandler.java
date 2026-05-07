@@ -3,6 +3,7 @@ package com.demo.rag.common;
 import com.demo.rag.model.response.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -34,6 +35,20 @@ public class GlobalExceptionHandler {
     public Result<Void> handleIllegalArgument(IllegalArgumentException e) {
         log.warn("参数校验失败：{}", e.getMessage());
         return Result.error(ErrorCode.BAD_REQUEST.getCode(), e.getMessage());
+    }
+
+    /**
+     * 处理 Jakarta Validation 校验异常（@Valid 触发）
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<Void> handleValidation(MethodArgumentNotValidException e) {
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + "：" + error.getDefaultMessage())
+                .findFirst()
+                .orElse("请求参数校验失败");
+        log.warn("参数校验失败：{}", message);
+        return Result.error(ErrorCode.BAD_REQUEST.getCode(), message);
     }
 
     /**

@@ -1,20 +1,20 @@
 package com.demo.rag.controller;
 
-import com.demo.rag.common.BusinessException;
-import com.demo.rag.common.ErrorCode;
+import com.demo.rag.model.entity.Document;
 import com.demo.rag.model.request.DocumentUploadRequest;
 import com.demo.rag.model.request.QuestionRequest;
 import com.demo.rag.model.response.AskResponse;
 import com.demo.rag.model.response.DocumentStatusResponse;
 import com.demo.rag.model.response.DocumentUploadResponse;
 import com.demo.rag.model.response.Result;
+import com.demo.rag.repository.DocumentRepository;
 import com.demo.rag.service.RagService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -33,6 +33,7 @@ public class RagController {
     private final RabbitTemplate rabbitTemplate;
     private final RedisTemplate<String, String> redisTemplate;
     private final RagService ragService;
+    private final DocumentRepository documentRepository;
 
     @Value("${rag.mq.exchange}")
     private String exchange;
@@ -45,13 +46,16 @@ public class RagController {
      * 返回 docId 用于查询处理状态
      */
     @PostMapping("/document")
-    public Result<DocumentUploadResponse> uploadDocument(@RequestBody DocumentUploadRequest request) {
+    public Result<DocumentUploadResponse> uploadDocument(@Valid @RequestBody DocumentUploadRequest request) {
         String content = request.getContent();
-        if (!StringUtils.hasText(content)) {
-            throw new BusinessException(ErrorCode.CONTENT_REQUIRED);
-        }
-
         String docId = UUID.randomUUID().toString();
+
+        // 持久化文档元数据到 MySQL
+        Document document = new Document();
+        document.setDocId(docId);
+        document.setContent(content);
+        document.setStatus("PENDING");
+        documentRepository.save(document);
 
         // 发送到消息队列，由消费者异步完成向量化
         rabbitTemplate.convertAndSend(exchange, routingKey, Map.of(
@@ -59,7 +63,7 @@ public class RagController {
                 "content", content
         ));
 
-        // Redis 初始状态标记为 PENDING
+        // Redis 初始状态标记为 PENDING（缓存加速查询）
         redisTemplate.opsForValue().set("doc_status:" + docId, "PENDING");
 
         log.info("文档上传任务已提交，docId：{}", docId);
@@ -74,14 +78,22 @@ public class RagController {
 
     /**
      * 查询文档向量化状态
+     * 优先查 Redis 缓存，未命中则查 MySQL
      */
     @GetMapping("/status/{docId}")
     public Result<DocumentStatusResponse> getStatus(@PathVariable String docId) {
         String status = redisTemplate.opsForValue().get("doc_status:" + docId);
 
+        if (status == null) {
+            // Redis 未命中，从 MySQL 查询
+            status = documentRepository.findByDocId(docId)
+                    .map(Document::getStatus)
+                    .orElse("NOT_FOUND");
+        }
+
         DocumentStatusResponse response = DocumentStatusResponse.builder()
                 .docId(docId)
-                .status(status != null ? status : "NOT_FOUND")
+                .status(status)
                 .build();
 
         return Result.success(response);
@@ -92,12 +104,8 @@ public class RagController {
      * 先查 Redis 缓存，未命中则进行向量检索并调用大模型生成回答
      */
     @PostMapping("/ask")
-    public Result<AskResponse> askQuestion(@RequestBody QuestionRequest request) {
+    public Result<AskResponse> askQuestion(@Valid @RequestBody QuestionRequest request) {
         String question = request.getQuestion();
-        if (!StringUtils.hasText(question)) {
-            throw new BusinessException(ErrorCode.QUESTION_REQUIRED);
-        }
-
         log.info("收到问答请求：{}", question);
         String answer = ragService.askQuestion(question);
 

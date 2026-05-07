@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -36,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final JavaMailSender javaMailSender;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -44,14 +46,34 @@ public class AuthServiceImpl implements AuthService {
     private static final String CODE_PREFIX = "VERIFY_CODE:";
     /** Redis Token 缓存前缀 */
     private static final String TOKEN_PREFIX = "USER_TOKEN:";
-    /** 密码加密盐值 */
-    private static final String PASSWORD_SALT = "_rag_salt_here!";
+    /** 旧版 SHA-256 盐值（仅用于兼容旧密码迁移） */
+    private static final String LEGACY_SALT = "_rag_salt_here!";
 
     /**
-     * 对密码进行 SHA-256 加盐哈希
+     * 使用 BCrypt 编码密码
      */
     private String encodePassword(String raw) {
-        return DigestUtils.sha256Hex(raw + PASSWORD_SALT);
+        return passwordEncoder.encode(raw);
+    }
+
+    /**
+     * 验证密码：优先 BCrypt，回退旧版 SHA-256 并自动迁移
+     */
+    private boolean verifyAndMigratePassword(User user, String rawPassword) {
+        // 优先使用 BCrypt 验证
+        if (passwordEncoder.matches(rawPassword, user.getPassword())) {
+            return true;
+        }
+        // 回退：尝试旧版 SHA-256 验证
+        String legacyHash = DigestUtils.sha256Hex(rawPassword + LEGACY_SALT);
+        if (legacyHash.equals(user.getPassword())) {
+            // 旧密码验证通过，自动迁移为 BCrypt
+            log.info("旧密码自动迁移为 BCrypt，用户ID：{}", user.getId());
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            userRepository.save(user);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -131,8 +153,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user = optUser.orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
-        // 校验密码
-        if (!user.getPassword().equals(encodePassword(request.getPassword()))) {
+        // 校验密码（支持旧版 SHA-256 自动迁移）
+        if (!verifyAndMigratePassword(user, request.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
 
@@ -175,6 +197,12 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
         return userRepository.findById(Long.parseLong(userIdStr))
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    public User getUserInfoById(Long userId) {
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 }
