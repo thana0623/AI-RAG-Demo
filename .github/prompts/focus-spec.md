@@ -1,6 +1,6 @@
 > task-id: code-cache-mcp-v1
 > created: 2026-05-26T11:00:00+08:00
-> status: pending-confirmation
+> status: confirmed
 
 # Focus Spec: 代码缓存 MCP 模块 (v1)
 
