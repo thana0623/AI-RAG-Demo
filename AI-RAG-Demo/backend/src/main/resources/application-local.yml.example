@@ -1,0 +1,19 @@
+spring:
+  # === RabbitMQ 配置（本地示例，按需修改）===
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    # RabbitMQ 默认 guest/guest 仅允许 localhost 连接；如你已创建新账号请替换
+    username: REPLACE_WITH_YOUR_RABBITMQ_USERNAME
+    password: REPLACE_WITH_YOUR_RABBITMQ_PASSWORD
+    virtual-host: /
+
+  # === Redis 配置（本地示例，按需修改）===
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      # 如果你的本地 Redis 没有密码，可置空: ""
+      password: REPLACE_OR_LEAVE_EMPTY_IF_NO_PASSWORD
+      database: 0
+      timeout: 3000ms

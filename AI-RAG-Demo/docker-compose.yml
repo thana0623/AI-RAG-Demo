@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # MySQL for relational data
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: rag_demo
+
+  # Redis for caching
+  redis:
+    image: redis:7.0-alpine
+    command: ["redis-server", "--requirepass", "123456"]
+    ports:
+      - "6379:6379"
+
+  # RabbitMQ for message queue
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: 123456
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # We will use built-in SimpleVectorStore or RedisVectorStore for the AI part

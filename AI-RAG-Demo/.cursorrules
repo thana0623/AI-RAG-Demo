@@ -1,0 +1,11 @@
+# Project Documentation Update Rules
+
+You are working on the AI RAG Demo project.
+
+## Critical Requirement
+1. The project maintains independent `.md` files in the `docs/` directory for each feature/module (e.g., `AUTH.md`, `RAG_UPLOAD.md`, `RAG_ASK.md`, `ARCHITECTURE.md`).
+2. **EVERY TIME you modify, update, or add a feature in the code, you MUST simultaneously update its corresponding `.md` file in the `docs/` folder to reflect the changes.**
+3. If you create a completely new major feature, you must create a new standalone `.md` file for it in the `docs/` folder.
+4. **After editing both the code and the corresponding `.md` file(s), you must commit the changes to Git and push them to the configured GitHub repository.**
+
+Always ensure that code implementations strictly match the designs outlined in the `docs/` markdown files, and vice versa.

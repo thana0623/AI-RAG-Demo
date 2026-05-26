@@ -1,0 +1,38 @@
+# RAG 对话检索模块 (RAG ASK)
+
+## 模块介绍
+该模块提供核心的 RAG 生成能力，将用户的纯文本输入传去向量数据库检索包含最接近词义/语意的相关文档，再通过大模型生成有依据的最佳回答。为了提高常用问题的响应速度且避免重复的大模型消耗，使用 Redis 作为快速查分的缓存中间件。
+
+## 功能点及接口
+- **知识库问答**
+  - **接口:** `POST /api/rag/ask`
+  - **流程:** 前端传来用户查询文本 `question`。
+    1. 缓存前置校验：查询 Redis 中的 `qa_cache:<question>`，若存在该查询结果，立刻作为 Answer 返回前端，结束流程。
+    2. 若未缓存命中，则使用 Spring AI 配置的 Embedding 接口和 VectorStore 实例从向量库中以 Cosine 相似度检索包含相似内容的 Top-K 文本块 (`documents`)。
+    3. 将检索到的上下文合并并在后方拼接进 Prompt 模板中作为 SystemMessage（指定助手为基于相关内容范围作答）。
+    4. 添加用户的查询问题文本（UserMessage），统一向 ChatClient 调用大语言模型 API 获取回答文本。
+    5. 接收回答文本返回前端，同时异步置入 Redis `qa_cache:<question>` 作为缓存，并设定有过期时间（10 分钟）。
+  - **异常:** 提问内容为空返回错误码 2002。
+
+## 统一错误码
+| 错误码 | 说明 |
+|-------|------|
+| 2002 | 提问内容不能为空 |
+
+## 异常处理机制
+- Controller 层不再使用 try-catch 处理异常，统一由 `GlobalExceptionHandler` 捕获。
+- 参数校验失败时抛出 `BusinessException(ErrorCode.QUESTION_REQUIRED)`。
+- 所有日志和错误消息均为中文。
+
+## 前端实现与页面
+  - 页面位置：`frontend/src/pages/home/index.vue`
+  - 问答面板组件：`frontend/src/pages/home/components/AskPanel.vue`
+  - API 调用封装：`frontend/src/services/rag.ts`
+
+  ## 前端交互流程（简要）
+  1. 用户输入问题并发送。
+  2. 请求中展示加载骨架，返回后显示回答文本。
+  3. 无结果时展示空状态提示。
+
+---
+`!Rule` 开发者提示：当修改 Prompt 内容设定、相似度召回的 Top-N 控制、或者对话缓存处理逻辑时，请同步更新此文件中所述规则及业务逻辑。

@@ -1,0 +1,20 @@
+{
+  "nextEntryId": 2,
+  "windowId": "W-0001",
+  "windowStartEntry": 1,
+  "windowCount": 1,
+  "windowEntries": [
+    {
+      "id": 1,
+      "date": "2026-05-07",
+      "request": "按优先级执行项目改进计划 P0 阶段：认证拦截器、BCrypt 密码哈希、Redis 向量存储持久化、Document 实体持久化、输入校验",
+      "changes": [
+        "新建 AuthInterceptor/WebMvcConfig/SecurityConfig/Document/DocumentRepository；修改 AuthServiceImpl(RagServiceImpl/AuthController/RagController/VectorStoreConfig/GlobalExceptionHandler/6个Request DTO/pom.xml/init_mysql.sql"
+      ],
+      "decisions": [
+        "使用 HandlerInterceptor 而非 Spring Security 全栈；BCrypt 替代 SHA-256 硬编码盐并支持旧密码自动迁移；RedisVectorStore 替代 SimpleVectorStore；Document JPA 实体持久化文档元数据；Jakarta Validation 统一输入校验"
+      ],
+      "todos": []
+    }
+  ]
+}
