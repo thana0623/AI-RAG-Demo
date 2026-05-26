@@ -1,0 +1,21 @@
+:root {
+  --color-primary: #1677ff;
+  --color-bg: #f5f7fa;
+  --color-card: #ffffff;
+  --color-text: #1f1f1f;
+  --color-text-muted: #8c8c8c;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --shadow-sm: 0 6px 18px rgba(16, 24, 40, 0.08);
+  --shadow-xs: 0 2px 8px rgba(16, 24, 40, 0.06);
+
+  --spacing-1: 8px;
+  --spacing-2: 16px;
+  --spacing-3: 24px;
+  --spacing-4: 32px;
+  --spacing-5: 48px;
+
+  --font-title: "Manrope", "Segoe UI", sans-serif;
+  --font-body: "Manrope", "Segoe UI", sans-serif;
+}
